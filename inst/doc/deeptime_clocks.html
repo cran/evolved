@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Matheus Januario, Andressa Viol, and Daniel Rabosky" />
+
+
+<title>Allele frequency change and selection</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Allele frequency change and selection</h1>
+<h4 class="author">Matheus Januario, Andressa Viol, and Daniel
+Rabosky</h4>
+<h4 class="date">Jan 2024</h4>
+
+
+
+<div id="learning-objectives" class="section level1">
+<h1>Learning objectives</h1>
+<ol style="list-style-type: decimal">
+<li>Exploring sequence data</li>
+<li>A simple measure of genetic distance</li>
+<li>The Poisson correction</li>
+<li>Building a molecular clock</li>
+<li>Molecular clocks and inferences about deep time</li>
+<li>Jukes-Cantor correction</li>
+<li>The uncertainty of your molecular clock</li>
+</ol>
+</div>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co">#loading packages we will need today:</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(ape)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(evolved)</span></code></pre></div>
+<p>deeptime_clocks.R</p>
+<p>We have encountered many processes that change allele frequency in a
+population, but today we will study the actual genetic differences among
+species. We will also learn how to use that genetic information to
+reconstruct the evolutionary past of lineages with the so-called
+“molecular clock”. To do that, we will use <em>real data</em> on
+molecules to estimate the divergence (in numbers of substitutions)
+between homologous proteins in different organisms.</p>
+<p>Homologous sequences, together with information from the fossil
+record, will be used to “calibrate” the rate at which amino acid
+substitutions occur during protein evolution. More specifically, given
+an estimate of the amount of divergence, plus an estimate of the rate at
+which divergence occurs, we can estimate how much time has passed since
+divergence.</p>
+</div>
+<div id="exploring-sequence-data" class="section level1">
+<h1>Exploring sequence data</h1>
+<p>We have assembled a set of protein sequences from the cytochrome
+oxidase 1 gene. This gene, often known as CO1 (“see-oh-one”), is a
+mitochondrial gene that plays a key role in cellular respiration (e.g.,
+the primary aerobic pathway to energy or ATP generation). CO1 contains
+approximately 513 amino acids and has been used in many studies to
+construct phylogenetic trees and estimate divergence times between
+taxa.</p>
+<p>We manually downloaded full-length genes of a number of focal taxa
+from the public database <a href="https://www.ncbi.nlm.nih.gov/genbank/">GenBank</a> (more general
+info about GenBank can be found in Benson et al., 2012). We then
+<em>aligned</em> the sequences using <a href="https://www.ebi.ac.uk/jdispatcher/msa/clustalo">CLUSTAL</a> (more
+info in Sievers et al., 2011), a widely-used sequence alignment
+tool.</p>
+<p>Because this dataset is included in our R package, we can access it
+by simply typing:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;cytOxidase&quot;</span>)</span></code></pre></div>
+<p>deeptime_clocks.R</p>
+<p>Now we can pull out the sequence of a single organism by typing:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>cytOxidase[<span class="st">&quot;human&quot;</span>]</span></code></pre></div>
+<p>deeptime_clocks.R</p>
+<p>Now, let’s explore our sequences a little.</p>
+<p>How many sequences do we have?</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">length</span>(cytOxidase)</span></code></pre></div>
+<pre><code>## [1] 17</code></pre>
+<p>deeptime_clocks.R</p>
+<p>What are the organisms in our dataset?</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">names</span>(cytOxidase)</span></code></pre></div>
+<pre><code>##  [1] &quot;cnidaria&quot;   &quot;snake&quot;      &quot;echinoderm&quot; &quot;mollusk&quot;    &quot;alligator&quot; 
+##  [6] &quot;lamprey&quot;    &quot;shark&quot;      &quot;bird&quot;       &quot;frog&quot;       &quot;fish&quot;      
+## [11] &quot;platypus&quot;   &quot;human&quot;      &quot;chimpanzee&quot; &quot;bryozoa&quot;    &quot;annelid&quot;   
+## [16] &quot;insect&quot;     &quot;crustacea&quot;</code></pre>
+<p>deeptime_clocks.R</p>
+<p>How long is each sequence?</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">unlist</span>(<span class="fu">lapply</span>(cytOxidase, nchar))</span></code></pre></div>
+<pre><code>##   cnidaria      snake echinoderm    mollusk  alligator    lamprey      shark 
+##        513        513        513        513        513        513        513 
+##       bird       frog       fish   platypus      human chimpanzee    bryozoa 
+##        513        513        513        513        513        513        513 
+##    annelid     insect  crustacea 
+##        513        513        513</code></pre>
+<p>deeptime_clocks.R</p>
+<p>You can access any particular sequence by typing:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>cytOxidase[<span class="st">&quot;platypus&quot;</span>]</span></code></pre></div>
+<pre><code>##                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            platypus 
+## &quot;NRWLFSTNHKDIGTLYLLFGAWAGMAGTALSILIRSELGQPGSLLGDDQIYNVIVTAHAFVMIFFMVMPIMIGGFGNWLVPLMIGAPDMAFPRMNNMSFWLLPPSFLLLLVSSTVEAGAGTGWTVYPPLAGNLAHAGASVDLAIFSLHLAGVSSILGAINFITTIINMKPPAMSQYQTPLFVWSVLITAVLLLLSLPVLAAGITMLLTDRNLNTTFFDPAGGGDPILYQHLFWFFGHPEVYILILPGFGIISHIVTYYSGKKEPFGYMGMVWAMMSIGFLGFIVWAHHMFTVGMDVDTRAYFTSATMIIAIPTGVKVFSWLATLHGGDIKWTPPMLWALGFIFLFTVGGLTGIVLANSSLDIILHDTYYVVAHFHYVLSMGAVFAIMGGFVHWFPLLSGFTLHPTWAKVHFTLMFVGVNLTFFPQHFLGLAGMPRRYSDYPDAYTLWNALSSLGSFVSLTAVMVMIFMIWEAFASKREVLS--VELTTTNIEWLHGC-PPPYHTFEQPVYIKA&quot;</code></pre>
+<p>deeptime_clocks.R</p>
+<p>You can compute the number of differences by typing:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">countSeqDiffs</span>(cytOxidase, <span class="st">&quot;human&quot;</span>, <span class="st">&quot;alligator&quot;</span>)  </span></code></pre></div>
+<pre><code>## [1] 77</code></pre>
+<p>deeptime_clocks.R</p>
+<p>Finally, you can get the length of a specific sequence by typing:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">nchar</span>(cytOxidase[<span class="st">&quot;platypus&quot;</span>])</span></code></pre></div>
+<pre><code>## platypus 
+##      513</code></pre>
+<p>deeptime_clocks.R</p>
+<hr />
+</div>
+<div id="a-simple-measure-of-genetic-distance" class="section level1">
+<h1>A simple measure of genetic distance</h1>
+<p>As mentioned in class, the simplest genetic distance between two
+sequences is just the proportion of differences (i.e., the
+p-distance).</p>
+<p>Now, lets focus on these pairs of taxa:</p>
+<pre><code>human-bird
+human-chimp
+human-platypus
+human-echinoderm
+cnidaria-insect
+insect-crustacean
+annelid-insect
+chimpanzee-insect
+chimpanzee-fish
+platypus-cnidaria
+frog-lamprey
+snake-shark
+insect-mollusk
+bird-alligator</code></pre>
+<p>If you are unfamiliar with creating matrices or named vectors in R,
+below is a tutorial to walk you through how to do this.</p>
+<p>To make a named vector, you will access the <code>names</code>
+attribute of a vector with the function <code>names()</code>. You will
+assign another vector that contains the names to the <code>names</code>
+attribute of your vector like this:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>seq_diff_vec <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">0</span>) <span class="co"># note that these numbers are completely made up</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="fu">names</span>(seq_diff_vec) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;snake-chimp&quot;</span>, <span class="st">&quot;human-echinoderm&quot;</span>, <span class="st">&quot;alligator-insect&quot;</span>, </span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>                         <span class="st">&quot;chimp-echinoderm&quot;</span>, <span class="st">&quot;human-chimp&quot;</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>seq_diff_vec</span></code></pre></div>
+<pre><code>##      snake-chimp human-echinoderm alligator-insect chimp-echinoderm 
+##                4                8                3                6 
+##      human-chimp 
+##                0</code></pre>
+<p>deeptime_clocks.R</p>
+<p>Note that you cannot repeat names, each name must be unique.</p>
+<p>As seen above, you now have a vector whose values are labeled with a
+unique identifier. As you have done many times in these labs, you can
+also access a particular value within your vector by its unique name
+using this format:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>seq_diff_vec[<span class="st">&quot;snake-chimp&quot;</span>]</span></code></pre></div>
+<pre><code>## snake-chimp 
+##           4</code></pre>
+<p>deeptime_clocks.R</p>
+<p>To make a matrix, use the handy function <code>matrix()</code>. Say I
+wanted to build a matrix that counts differences between 3 pairs:
+snake-human, insect-snake, and insect-human. First, I will build a
+skeleton matrix to hold this data:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="at">data =</span> <span class="cn">NA</span>,  <span class="co"># placeholder value for each matrix&#39;s cell will be NA </span></span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>                   <span class="co"># (later will be replaced by real data)</span></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>       <span class="at">nrow =</span> <span class="dv">3</span>,  <span class="co"># one row for each taxon group</span></span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>       <span class="at">ncol =</span> <span class="dv">3</span>,  <span class="co"># one col for each taxon group</span></span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>       <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="st">&quot;snake&quot;</span>, <span class="st">&quot;human&quot;</span>, <span class="st">&quot;insect&quot;</span>), <span class="co"># these are the row names</span></span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a>                       <span class="fu">c</span>(<span class="st">&quot;snake&quot;</span>, <span class="st">&quot;human&quot;</span>, <span class="st">&quot;insect&quot;</span>)) <span class="co"># these are the column names</span></span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a>)</span></code></pre></div>
+<p>deeptime_clocks.R</p>
+<p>Let’s take a look at our skeleton matrix.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a>m</span></code></pre></div>
+<pre><code>##        snake human insect
+## snake     NA    NA     NA
+## human     NA    NA     NA
+## insect    NA    NA     NA</code></pre>
+<p>deeptime_clocks.R</p>
+<p>Looks good! Now, to fill in the cell values that currently say
+<code>NA</code> with data containing the sequence differences between
+each pair, I can directly subset the matrix at the row, column, or cell
+that I want using base subsetting in R. A very important thing to note
+is that this matrix is symmetric, meaning that both the upper and lower
+triangles are the same. It is symmetric because there are two cells for
+each pair of taxa, but only one value of sequence differences for that
+pair. Thus, you may choose to either leave one half of the matrix blank,
+or repeat the values.</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a>m[<span class="dv">1</span>,] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">5</span>, <span class="dv">2</span>) <span class="co"># replacing the entire first row with fake numbers</span></span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a>m[<span class="dv">2</span>,] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">0</span>, <span class="dv">80</span>) <span class="co"># replacing the entire second row with fake numbers</span></span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a>m[<span class="dv">3</span>,] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">80</span>, <span class="dv">0</span>) <span class="co"># repalcing the entire third row with fake numbers</span></span>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a>m</span></code></pre></div>
+<pre><code>##        snake human insect
+## snake      0     5      2
+## human      5     0     80
+## insect     2    80      0</code></pre>
+<p>deeptime_clocks.R</p>
+<p>Like this, we can manually alter the matrix. You can also do this
+with a nested loop, though this is more complicated.</p>
+</div>
+<div id="the-poisson-correction" class="section level1">
+<h1>The Poisson correction</h1>
+<p>Here are some extra hints for Q8:</p>
+<p>Hint (1): Make sure you have entered your data correctly! A good
+thing to always do is to make sure the lengths of your vectors are the
+same:</p>
+<pre><code>length(p_dist) # assuming your p-distance vector is named like this
+length(poiss_dist) # same as above for the poisson-corrected distance</code></pre>
+<p>Hint (2): You can add a 1:1 line (perfect correspondence between
+axes) by typing in the following <em>after</em> the code that creates
+your scatterplot:</p>
+<pre><code>abline(a=0, b=1) # note that the arguments are the parameters of the line equation</code></pre>
+<div id="some-food-for-thought" class="section level2">
+<h2>Some food for thought:</h2>
+<p>What is your estimate of the average number of substitutions per site
+that have occurred since humans and chimpanzees shared a common
+ancestor? What assumption did you make to get this estimate?</p>
+<hr />
+</div>
+</div>
+<div id="building-a-molecular-clock" class="section level1">
+<h1>Building a molecular clock</h1>
+<p>Now, we are going to calibrate a molecular clock and apply it to the
+distances you have computed above. The <em>rate</em> at which our
+metaphorical clock “ticks” will be used to compute the expected number
+of substitutions per million years. Just for reference, here is a
+phylogeny of all the species in your dataset:</p>
+<p><img src="data:image/png;base64,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" /><!-- -->deeptime_clocks.R</p>
+<p>Note that we manually set all branches to have equal lengths in the
+figure above. What we want now is to make the branches proportional to
+time.</p>
+<p>For our calibration, we are going to use a single fossil to calibrate
+the age of the most-recent ancestor of humans and birds. Fortunately,
+there is an extremely useful fossil taxon, <em>Hylonomus</em> known from
+Nova Scotia, that is thought to be extremely closely related to the
+common ancestor of birds and mammals. Researchers have used the age of
+this fossil (312 Ma) to calibrate molecular clocks.</p>
+<p>Now, we will use your Poisson-corrected distance between birds and
+humans and the dating of to estimate the rate of protein evolution (in
+substitutions per site per million years).</p>
+<div id="molecular-clocks-and-inferences-about-deep-time" class="section level2">
+<h2>Molecular clocks and inferences about deep-time</h2>
+
+</div>
+</div>
+<div id="the-jukes-cantor-correction" class="section level1">
+<h1>The Jukes-Cantor correction</h1>
+<div id="some-food-for-thought-1" class="section level3">
+<h3>Some food for thought:</h3>
+<p>What happens with the Jukes-Cantor distance if <span class="math inline">\(p \geq 0.75\)</span>? Why would that happen?</p>
+<p>Hint: Think about what “multiple hits” means.</p>
+<hr />
+</div>
+</div>
+<div id="the-uncertainty-of-your-molecular-clock" class="section level1">
+<h1>The uncertainty of your molecular clock</h1>
+<p>Now, we are going to look at how confident we are about our original
+rate estimate, and what the implications of this is. More specifically,
+we are going to generate a profile plot of the “log-transformed
+probability” (in this case, this is the same as the <em>log
+likelihood</em>, a term you might have heard before) as a function of
+the substitution rate parameter.</p>
+<p>To get the probability of observing a specific number of mutations,
+you can use the <code>dpois()</code> function:</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="co"># For instance, what is the probability of observing 10 substitutions in a 37-long </span></span>
+<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a><span class="co"># AA sequence after 10 million years of divergence</span></span>
+<span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a><span class="co"># if the substitution rate is equal to 0.1 substitutions</span></span>
+<span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a><span class="co"># per site per million years?</span></span>
+<span id="cb28-5"><a href="#cb28-5" tabindex="-1"></a></span>
+<span id="cb28-6"><a href="#cb28-6" tabindex="-1"></a>rate_A <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb28-7"><a href="#cb28-7" tabindex="-1"></a>AA_seq_length <span class="ot">&lt;-</span> <span class="dv">37</span></span>
+<span id="cb28-8"><a href="#cb28-8" tabindex="-1"></a></span>
+<span id="cb28-9"><a href="#cb28-9" tabindex="-1"></a>obs_subs <span class="ot">&lt;-</span> <span class="dv">10</span>  <span class="co"># amount of substitutions that have occurred</span></span>
+<span id="cb28-10"><a href="#cb28-10" tabindex="-1"></a>obs_time <span class="ot">&lt;-</span> <span class="dv">10</span>  <span class="co"># amount of time that has passed</span></span>
+<span id="cb28-11"><a href="#cb28-11" tabindex="-1"></a></span>
+<span id="cb28-12"><a href="#cb28-12" tabindex="-1"></a>prob_given_rate_A <span class="ot">&lt;-</span> <span class="fu">dpois</span>(</span>
+<span id="cb28-13"><a href="#cb28-13" tabindex="-1"></a>  <span class="at">x =</span> obs_subs, <span class="at">lambda =</span> obs_time <span class="sc">*</span> rate_A <span class="sc">*</span> AA_seq_length)</span>
+<span id="cb28-14"><a href="#cb28-14" tabindex="-1"></a></span>
+<span id="cb28-15"><a href="#cb28-15" tabindex="-1"></a>prob_given_rate_A <span class="co"># this is the likelihood</span></span></code></pre></div>
+<pre><code>## [1] 1.130729e-07</code></pre>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="co"># finally, we take the (natural) log, to get</span></span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a><span class="co"># the log-likelihood of observing the data</span></span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a><span class="co"># given the model and the rate value:</span></span>
+<span id="cb30-4"><a href="#cb30-4" tabindex="-1"></a><span class="fu">log</span>(prob_given_rate_A)</span></code></pre></div>
+<pre><code>## [1] -15.99523</code></pre>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a><span class="co"># the questions is, then: what is the likelihood of observing &gt;the same&lt; data </span></span>
+<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a><span class="co"># under different values of substitution rate?</span></span></code></pre></div>
+<p>deeptime_clocks.R</p>
+<div id="brief-introduction-to-intervals-derived-from-log-likelihood" class="section level2">
+<h2>Brief introduction to intervals derived from log-likelihood</h2>
+<p>When we are estimating only a single parameter, likelihood theory
+shows that any likelihood value of a parameter <span class="math inline">\(\theta\)</span> given data <span class="math inline">\(x\)</span> (i.e. <span class="math inline">\(L(\theta | x)\)</span>) that satisfies the
+following inequality:</p>
+<p><span class="math display">\[\begin{equation}
+L(\theta | x) \geq ( MAX(L(\theta | x)) - 1.92)
+\end{equation}\]</span></p>
+<p>will provide an estimate of the 95% confidence interval for our
+parameter value.</p>
+<p><br />
+</p>
+<hr />
+</div>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<p>Benson, D. A., Cavanaugh, M., Clark, K., Karsch-Mizrachi, I., Lipman,
+D. J., Ostell, J., &amp; Sayers, E. W. (2012). GenBank. Nucleic acids
+research, 41(D1), D36-D42.</p>
+<p>Hedges, S. B., &amp; Kumar, S. (2003). Genomic clocks and
+evolutionary timescales. TRENDS in Genetics, 19(4), 200-206.</p>
+<p>Sievers, F., Wilm, A., Dineen, D., Gibson, T. J., Karplus, K., Li,
+W., … &amp; Higgins, D. G. (2011). Fast, scalable generation of
+high‐quality protein multiple sequence alignments using Clustal Omega.
+Molecular systems biology, 7(1), 539.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
